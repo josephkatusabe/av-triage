@@ -1,0 +1,650 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classroom AV Help — Middlebury</title>
+<style>
+/* =====================================================================
+   ZERO-DEPENDENCY STYLESHEET
+   No CDN, no web fonts — system fonts render instantly on every device.
+   Edit the design tokens below to retheme the whole app.
+   ===================================================================== */
+:root {
+  /* Palette */
+  --midd:      #0D395F;   /* Middlebury navy */
+  --midd-lt:   #1A5A8A;   /* interactive blue */
+  --mist:      #F4F7FA;   /* app background */
+  --card:      #FFFFFF;
+  --border:    #DDE5EC;
+  --ink:       #22303C;
+  --muted:     #64748B;
+  --panic:     #D1272E;
+  --panic-dk:  #A81D23;
+  --ok:        #177245;
+  --placeholder: #E5E7EB;
+
+  /* Type & sizing */
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+  --radius: 16px;
+  --tap-min: 64px;        /* minimum touch-target height */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--font);
+  background: var(--mist);
+  color: var(--ink);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overscroll-behavior: none;
+  line-height: 1.5;
+}
+
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+
+/* ---------- Header ---------- */
+header {
+  background: var(--midd);
+  color: #fff;
+  padding: 20px 20px 16px;
+  box-shadow: 0 2px 8px rgba(13, 57, 95, .25);
+}
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: #A9C4DC;
+}
+h1 {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+#restartBtn {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, .15);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: #fff;
+}
+#restartBtn:hover, #restartBtn:active { background: rgba(255, 255, 255, .28); }
+
+#crumb {
+  color: #A9C4DC;
+  font-size: 14px;
+  margin-top: 8px;
+  line-height: 1.4;
+  min-height: 0;
+}
+#crumb:empty { display: none; }
+
+/* ---------- Main ---------- */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 20px 150px;   /* bottom padding clears the fixed panic button */
+}
+
+/* ---------- Screen transitions ---------- */
+.screen { animation: slideIn .18s ease-out; }
+.screen.going-back { animation: slideBack .18s ease-out; }
+@keyframes slideIn  { from { opacity: 0; transform: translateX(14px); }  to { opacity: 1; transform: none; } }
+@keyframes slideBack{ from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Question screens ---------- */
+h2 {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 20px;
+}
+h2:focus { outline: none; } /* Programmatic focus target—remains visually clean but reads out loud */
+.subtitle {
+  color: var(--muted);
+  font-size: 16px;
+  margin: -14px 0 20px;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--midd-lt);
+  font-weight: 600;
+  font-size: 16px;
+  padding: 8px 12px 8px 4px;
+  margin: -8px 0 12px -4px;
+  border-radius: 10px;
+}
+.back-btn .chev { font-size: 22px; line-height: 1; }
+
+.options { display: grid; gap: 12px; }
+
+.choice {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  text-align: left;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(34, 48, 60, .06);
+  transition: transform .08s ease, border-color .12s ease;
+}
+.choice:hover  { border-color: var(--midd-lt); }
+.choice:active { transform: scale(.98); }
+.choice .icon  { font-size: 28px; }
+.choice .label { font-size: 18px; font-weight: 600; line-height: 1.35; }
+.choice .arrow { margin-left: auto; color: #94A3B8; font-size: 24px; }
+
+/* ---------- Solution screens ---------- */
+.steps { list-style: none; display: grid; gap: 16px; }
+
+.step {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(34, 48, 60, .06);
+}
+.step-row { display: flex; gap: 16px; }
+.step-num {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--midd);
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.step-text { font-size: 18px; line-height: 1.55; padding-top: 4px; }
+.step-text b { font-weight: 700; }
+
+.img-placeholder {
+  margin-top: 16px;
+  height: 160px;
+  background: var(--placeholder);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0 16px;
+}
+
+/* ---------- Utility buttons ---------- */
+.btn-outline {
+  min-height: var(--tap-min);
+  width: 100%;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--midd-lt);
+  transition: transform .08s ease;
+}
+.btn-outline:active { transform: scale(.98); }
+
+.btn-fixed {
+  min-height: var(--tap-min);
+  width: 100%;
+  margin-top: 20px;
+  background: var(--card);
+  border: 2px solid var(--ok);
+  border-radius: var(--radius);
+  padding: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ok);
+  transition: transform .08s ease;
+}
+.btn-fixed:active { transform: scale(.98); }
+
+/* ---------- Room picker ---------- */
+.field-label {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.field-label:focus { outline: none; }
+select {
+  width: 100%;
+  font: inherit;
+  font-size: 18px;
+  color: var(--ink);
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748B' viewBox='0 0 16 16'%3E%3Cpath d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+select:focus { border-color: var(--midd-lt); outline: none; }
+.picker-gap { margin-top: 16px; }
+
+/* ---------- Success screen ---------- */
+.success { text-align: center; padding-top: 40px; }
+.success .emoji { font-size: 56px; margin-bottom: 16px; }
+.success h2 { margin-bottom: 8px; }
+.success p { color: var(--muted); font-size: 18px; margin-bottom: 32px; }
+
+/* ---------- Panic button (fixed footer) ---------- */
+.panic-wrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24px 20px calc(16px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--mist) 65%, transparent);
+  pointer-events: none;
+}
+#panicBtn {
+  pointer-events: auto;
+  position: relative;
+  display: block;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--panic);
+  color: #fff;
+  text-decoration: none;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  box-shadow: 0 4px 14px rgba(209, 39, 46, .35);
+}
+#panicBtn:hover, #panicBtn:active { background: var(--panic-dk); }
+#panicBtn::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 20px;
+  border: 2px solid rgba(209, 39, 46, .45);
+  animation: ring 2.4s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes ring {
+  0%   { transform: scale(1);    opacity: 1; }
+  70%  { transform: scale(1.05); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* ---------- Accessibility ---------- */
+:focus-visible { outline: 3px solid var(--midd-lt); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .screen, .screen.going-back { animation: none; }
+  #panicBtn::after { animation: none; opacity: 0; }
+  .choice, .btn-outline, .btn-fixed { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div>
+      <p class="eyebrow">Classroom AV Help</p>
+      <h1 id="roomTitle">Loading…</h1>
+    </div>
+    <button id="restartBtn" hidden aria-label="Start over">↺ Start over</button>
+  </div>
+  <p id="crumb"></p>
+</header>
+
+<main id="app" role="main"></main>
+
+<div class="panic-wrap">
+  <a id="panicBtn" href="tel:+18024432200">📞 Still stuck? Call Media Services now</a>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIG — the parts you'll actually edit
+   ===================================================================== */
+const SUPPORT_PHONE = '+18024432200'; // <-- change to your real support line
+document.getElementById('panicBtn').href = 'tel:' + SUPPORT_PHONE;
+
+// Rooms shown in the dropdown when no ?room= param is present
+const ROOMS = [
+  'Axinn 103', 'Axinn 219', 'Axinn 229',
+  'Bicentennial Hall 216', 'Bicentennial Hall 220',
+  'Davis Library 105', 'Davis Library 201',
+  'McCardell Bicentennial 104',
+  'Munroe 214', 'Munroe 303',
+  'Twilight 201', 'Twilight 302',
+  'Warner 101', 'Warner 202',
+];
+
+/* =====================================================================
+   DECISION TREE — pure data, easy to edit or extend.
+   Two node types:
+     { question, options: [{icon, label, next}] }  -> button screen
+     { title, steps: [{text, img?}] }              -> solution screen
+   Add `img: 'description'` to any step to generate a gray placeholder
+   block you can later swap for a real GIF or photo.
+   ===================================================================== */
+const TREE = {
+  root: {
+    question: "What's the issue?",
+    options: [
+      { icon: '🖥️', label: 'Projector / Display', next: 'projector' },
+      { icon: '🔊', label: 'Audio / Sound',        next: 'audio' },
+      { icon: '🔌', label: 'Adapters & Cables',    next: 'adapters' },
+    ]
+  },
+
+  /* ---------- PROJECTOR BRANCH ---------- */
+  projector: {
+    question: 'What do you see?',
+    options: [
+      { icon: '⬛', label: 'Screen is completely black',  next: 'proj_black' },
+      { icon: '🚫', label: 'Screen says “No Signal”',     next: 'proj_nosignal' },
+      { icon: '🌫️', label: 'Image is blurry or cut off',  next: 'proj_blurry' },
+    ]
+  },
+  proj_black: {
+    title: 'Black screen',
+    steps: [
+      { text: 'Press the <b>Display On</b> button on the wall panel and wait 60–90 seconds. Projectors warm up slowly.', img: 'Pressing Display On at the wall panel' },
+      { text: 'Check that the projector power light (on the ceiling unit) is <b>green</b>, not red or blinking.' },
+      { text: 'Wake your laptop — tap the trackpad or press any key. A sleeping laptop sends no picture.' },
+    ]
+  },
+  proj_nosignal: {
+    title: '“No Signal” message',
+    steps: [
+      { text: 'Unplug the HDMI cable from your laptop and firmly plug it back in.', img: 'Reseating the HDMI connection' },
+      { text: 'On the wall panel, make sure the correct input is selected (usually <b>HDMI</b> or <b>Laptop</b>).', img: 'Selecting the HDMI input on the panel' },
+      { text: 'On your laptop, press <b>⌘ + F1</b> (Mac) or <b>Win + P → Duplicate</b> (Windows) to force screen mirroring.' },
+    ]
+  },
+  proj_blurry: {
+    title: 'Blurry or cut-off image',
+    steps: [
+      { text: 'Set your laptop resolution to <b>1920 × 1080</b> — the native resolution for most classroom projectors.' },
+      { text: 'Windows: <b>Win + P → Duplicate</b>. Mac: System Settings → Displays → <b>Mirror</b>. Extended mode often crops.', img: 'Switching to Duplicate / Mirror mode' },
+      { text: 'If only the edges are cut off, look for an “Aspect” or “Auto Adjust” button on the wall panel.' },
+    ]
+  },
+
+  /* ---------- AUDIO BRANCH ---------- */
+  audio: {
+    question: "What's wrong with the sound?",
+    options: [
+      { icon: '🔇', label: 'No sound at all',        next: 'audio_none' },
+      { icon: '📉', label: 'Sound is too quiet',     next: 'audio_quiet' },
+      { icon: '🎙️', label: 'Microphone not working', next: 'audio_mic' },
+    ]
+  },
+  audio_none: {
+    title: 'No sound',
+    steps: [
+      { text: 'Turn up <b>both</b> volumes: the wall panel volume AND your laptop volume. Either at zero = silence.', img: 'Raising volume on the wall panel' },
+      { text: 'On your laptop, set the sound output to the room system (often named <b>Crestron</b>, <b>Extron</b>, or the room number) — not “Laptop Speakers.”', img: 'Choosing the room audio output' },
+      { text: 'Check the video itself isn’t muted (YouTube and slide decks have their own mute buttons).' },
+    ]
+  },
+  audio_quiet: {
+    title: 'Sound too quiet',
+    steps: [
+      { text: 'Set your <b>laptop volume to 100%</b>, then use the wall panel to set the room level.' },
+      { text: 'Turn up the volume inside the app or video player too — three volume controls stack together.' },
+    ]
+  },
+  audio_mic: {
+    title: 'Microphone issues',
+    steps: [
+      { text: 'Check the mic power switch and battery light. A red or blinking light means the battery is dying — spares are usually in the podium drawer.', img: 'Checking mic power and battery light' },
+      { text: 'Make sure the mic isn’t muted — many handhelds and lapels have a separate mute slider.' },
+      { text: 'On the wall panel, confirm the <b>Mic volume</b> (separate from program volume) is up.' },
+    ]
+  },
+
+  /* ---------- ADAPTERS BRANCH ---------- */
+  adapters: {
+    question: 'What do you need to connect?',
+    options: [
+      { icon: '💻', label: 'MacBook (USB-C only)',        next: 'adapt_usbc' },
+      { icon: '🖇️', label: 'Cable seems loose / damaged', next: 'adapt_damaged' },
+      { icon: '📱', label: 'iPad or phone',               next: 'adapt_ipad' },
+    ]
+  },
+  adapt_usbc: {
+    title: 'Connecting a USB-C laptop',
+    steps: [
+      { text: 'A <b>USB-C → HDMI adapter</b> should be tethered at the podium. Plug the adapter into your laptop first, then attach the HDMI cable.', img: 'Using the podium USB-C adapter' },
+      { text: 'No adapter at the podium? The circulation desk at Davis Library loans them same-day.' },
+      { text: 'If the picture flickers, push the adapter fully into the USB-C port — partial seating is the #1 cause.' },
+    ]
+  },
+  adapt_damaged: {
+    title: 'Loose or damaged cable',
+    steps: [
+      { text: 'Try the <b>second HDMI cable</b> if the podium has one, or a different input plate on the wall.', img: 'Locating the spare HDMI input' },
+      { text: 'Gently support the cable so its weight doesn’t pull on your laptop port.' },
+      { text: 'Report the damaged cable with the red call button below so it gets replaced before your next class.' },
+    ]
+  },
+  adapt_ipad: {
+    title: 'Connecting an iPad or phone',
+    steps: [
+      { text: 'iPads with USB-C use the same podium <b>USB-C → HDMI adapter</b> as laptops.' },
+      { text: 'Lightning devices need a <b>Lightning → HDMI adapter</b> — borrow one from Media Services or the library desk.', img: 'Lightning to HDMI adapter' },
+      { text: 'Unlock the device and keep it awake; a locked screen stops the video signal.' },
+    ]
+  },
+};
+
+/* =====================================================================
+   APP STATE + RENDERING
+   ===================================================================== */
+const app = document.getElementById('app');
+const roomTitle = document.getElementById('roomTitle');
+const crumbEl = document.getElementById('crumb');
+const restartBtn = document.getElementById('restartBtn');
+
+let history = [];       // stack of node keys, e.g. ['root','projector']
+let crumbs = [];        // labels of choices made
+let room = null;
+let backwards = false;  // slide direction for the transition
+
+/* ---------- Room detection ---------- */
+function detectRoom() {
+  const param = new URLSearchParams(location.search).get('room');
+  if (param) {
+    // Robust parsing: handles underscores, hyphens, URL encodings, and missing spaces
+    room = decodeURIComponent(param)
+      .replace(/[_-]/g, ' ')
+      .replace(/([a-zA-Z])(\d)/, '$1 $2')
+      .replace(/\s+/g, ' ')
+      .trim();
+    roomTitle.textContent = 'Troubleshooting for ' + room;
+    go('root');
+  } else {
+    roomTitle.textContent = 'Which room are you in?';
+    renderRoomPicker();
+  }
+}
+
+function renderRoomPicker() {
+  crumbEl.textContent = '';
+  restartBtn.hidden = true;
+  app.innerHTML = `
+    <div class="screen">
+      <label id="pickerLabel" tabindex="-1" class="field-label" for="roomSelect">Select your room</label>
+      <select id="roomSelect">
+        <option value="" selected disabled>Tap to choose…</option>
+        ${ROOMS.map(r => `<option>${r}</option>`).join('')}
+      </select>
+      <button id="roomSkip" class="btn-outline picker-gap">Skip — just show me the fixes</button>
+    </div>`;
+  
+  // Accessibility: shift focus to picker label
+  document.getElementById('pickerLabel').focus();
+
+  document.getElementById('roomSelect').addEventListener('change', e => {
+    room = e.target.value;
+    roomTitle.textContent = 'Troubleshooting for ' + room;
+    go('root');
+  });
+  document.getElementById('roomSkip').addEventListener('click', () => {
+    roomTitle.textContent = 'Classroom troubleshooting';
+    go('root');
+  });
+}
+
+/* ---------- Navigation ---------- */
+function go(key, label) {
+  if (label) crumbs.push(label);
+  history.push(key);
+  backwards = false;
+  render();
+}
+
+function goBack() {
+  if (history.length <= 1) return;
+  history.pop();
+  crumbs.pop();
+  backwards = true;
+  render();
+}
+
+function restart() {
+  history = ['root'];
+  crumbs = [];
+  backwards = true;
+  render();
+}
+restartBtn.addEventListener('click', restart);
+
+/* ---------- Render current node ---------- */
+function render() {
+  const key = history[history.length - 1];
+  const node = TREE[key];
+  const showBack = history.length > 1;
+
+  restartBtn.hidden = history.length <= 1;
+  crumbEl.textContent = crumbs.join('  ›  ');
+
+  const backButton = showBack
+    ? `<button id="backBtn" class="back-btn"><span class="chev">‹</span> Back</button>`
+    : '';
+
+  let inner = '';
+
+  if (node.options) {
+    /* ----- question screen ----- */
+    inner = `
+      ${backButton}
+      <h2 tabindex="-1">${node.question}</h2>
+      <div class="options">
+        ${node.options.map((o, i) => `
+          <button class="choice" data-i="${i}">
+            <span class="icon" aria-hidden="true">${o.icon}</span>
+            <span class="label">${o.label}</span>
+            <span class="arrow" aria-hidden="true">›</span>
+          </button>`).join('')}
+      </div>`;
+  } else {
+    /* ----- solution screen ----- */
+    inner = `
+      ${backButton}
+      <h2 tabindex="-1">${node.title}</h2>
+      <p class="subtitle">Try these in order — most issues are fixed by step 1 or 2.</p>
+      <ol class="steps">
+        ${node.steps.map((s, i) => `
+          <li class="step">
+            <div class="step-row">
+              <span class="step-num" aria-hidden="true">${i + 1}</span>
+              <p class="step-text">${s.text}</p>
+            </div>
+            ${s.img ? `<div class="img-placeholder">[IMAGE: ${s.img}]</div>` : ''}
+          </li>`).join('')}
+      </ol>
+      <button id="fixedBtn" class="btn-fixed">✓ That fixed it</button>`;
+  }
+
+  app.innerHTML = `<div class="screen${backwards ? ' going-back' : ''}">${inner}</div>`;
+  window.scrollTo(0, 0);
+
+  // Accessibility: target the newly rendered header to keep screen readers tracking with the DOM modifications
+  const currentHeading = app.querySelector('h2');
+  if (currentHeading) currentHeading.focus();
+
+  // Wire up events
+  const back = document.getElementById('backBtn');
+  if (back) back.addEventListener('click', goBack);
+
+  app.querySelectorAll('.choice').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const opt = node.options[btn.dataset.i];
+      go(opt.next, opt.label);
+    });
+  });
+
+  const fixed = document.getElementById('fixedBtn');
+  if (fixed) fixed.addEventListener('click', renderSuccess);
+}
+
+/* ---------- Success screen ---------- */
+function renderSuccess() {
+  restartBtn.hidden = true;
+  crumbEl.textContent = '';
+  app.innerHTML = `
+    <div class="screen success">
+      <div class="emoji" aria-hidden="true">🎉</div>
+      <h2 tabindex="-1">You're back in business</h2>
+      <p>Have a great class${room ? ' in ' + room : ''}.</p>
+      <button id="againBtn" class="btn-outline">↺ Troubleshoot something else</button>
+    </div>`;
+
+  // Accessibility focus shift
+  const currentHeading = app.querySelector('h2');
+  if (currentHeading) currentHeading.focus();
+
+  document.getElementById('againBtn').addEventListener('click', restart);
+}
+
+/* ---------- Boot ---------- */
+detectRoom();
+</script>
+</body>
+</html>
